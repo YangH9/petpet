@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1" />
+    <meta name="referrer" content="no-referrer" >
+    <meta name="description" content="摸头生成器" />
+    <meta name="theme-color" content="#ffeaa8" />
+    <title>摸头</title>
+
+    <!-- Sanitize CSS -->
+    <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
+    <link href="https://unpkg.com/sanitize.css/forms.css" rel="stylesheet" />
+    <link href="https://unpkg.com/sanitize.css/typography.css" rel="stylesheet" />
+    <!-- External -->
+    <link rel="stylesheet" href="https://unpkg.com/jam-icons/css/jam.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@700&family=Work+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- CSS -->
+    <link rel="stylesheet" href="./css/style.css" />
+    <script>
+      /* change theme */ let theme = localStorage.getItem('theme')
+      theme || (theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+        document.documentElement.setAttribute('data-theme', theme),
+        document.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('a.e').forEach(x => {
+            x.href = x.dataset.href
+          })
+          const e = document.getElementById('color-theme')
+          ;(e.checked = 'dark' == theme),
+            e.addEventListener('change', t => {
+              ;(theme = e.checked ? 'dark' : 'light'),
+                document.documentElement.setAttribute('data-theme', theme),
+                localStorage.setItem('theme', theme)
+            })
+        })
+    </script>
+  </head>
+
+  <body>
+    <main class="grid">
+      <header class="header">
+        <div class="heading">摸头生成器<input type="checkbox" id="color-theme" title="toggle theme" /></div>
+        <div>如果你的浏览器崩溃了，这不是我的错</div>
+      </header>
+
+      <section class="preview content">
+        <div class="content-heading">预览</div>
+        <div class="preview-canvas">
+          <canvas height="112" width="112" id="canvas" class="canvas" tabindex="1"></canvas>
+          <div class="preview-playback">
+            <button id="prev" class="btn btn-playback-prev control-grouped-left">
+              <i class="jam jam-set-backward"></i>
+            </button>
+            <button id="play" class="btn btn-playback-playpause control-grouped-center">
+              <i class="jam jam-play btn-playback-play"></i>
+              <i class="jam jam-pause btn-playback-pause"></i>
+            </button>
+            <button id="next" class="btn btn-playback-next control-grouped-right">
+              <i class="jam jam-set-forward"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-controls">
+          <div class="row">
+            <div class="control-group">
+              <label for="toggleAdjust" class="control-group-l">调整模式</label>
+              <label for="toggleAdjust" class="toggle-switch">
+                <input id="toggleAdjust" type="checkbox" class="toggle-switch-input" />
+                <span class="toggle-switch-control"></span>
+              </label>
+            </div>
+            <div class="hint">
+              启用在预览中使用鼠标/触摸/键盘移动图像。也适用于移动设备 :-)
+            </div>
+          </div>
+          <div class="row control-group">
+            <label for="toggleFlip" class="control-group-l">反转</label>
+            <label for="toggleFlip" class="toggle-switch sm">
+              <input id="toggleFlip" type="checkbox" class="toggle-switch-input" />
+              <span class="toggle-switch-control"></span>
+            </label>
+          </div>
+          <div class="row control-group">
+            <label for="scale" class="control-label control-group-s">大小</label>
+            <input id="scale" class="control-range control-group-l" type="range" step="1" min="15" max="200" value="85" />
+          </div>
+          <div class="row control-group">
+            <label for="squish" class="control-label control-group-s">挤压</label>
+            <input id="squish" class="control-range control-group-l" type="range" step="1" min="100" max="300" value="125" />
+          </div>
+          <div class="row control-group">
+            <label for="fps" class="control-label control-group-s">速度</label>
+            <input id="fps" class="control-range" type="range" step="2" min="2" max="60" value="16" />
+            <input type="number" id="fpsVal" class="control control-sm" step="1" min="2" max="60" value="16" />
+          </div>
+          <div class="row export-row">
+            <div class="control-group">
+              <button id="reset" class="btn btn-reset control-group-s">重置</button>
+              <div class="spacer" style="width:0.382em"></div>
+              <button id="export" class="btn btn-export control-group-l">导出</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="upload content">
+        <div class="content-heading">上传</div>
+        <div class="upload-preview">
+          <label class="drop-area preview-image-container" id="dropArea" for="uploadFile">
+            <div class="drop-area-input">
+              <input class="drop-area-file-input" type="file" id="uploadFile" accept="image/*" />
+              <img class="drop-area-preview preview-image" src="" id="uploadPreview" />
+              <div class="drop-area-upload" for="uploadFile">
+                <label for="uploadFile" class="drop-area-upload-btn btn">选择文件</label>
+                <label id="uploadFileName" class="drop-area-upload-filename">或者拖拽到这里</label>
+              </div>
+            </div>
+          </label>
+          <div class="row control-group">
+            <input
+              class="control control-group-l control-has-icon control-grouped-left"
+              type="url"
+              required
+              placeholder="输入要上传的网站"
+              id="uploadUrl"
+            />
+            <button type="submit" class="btn control-icon control-grouped-right" id="uploadUrlBtn"><i class="jam jam-upload"></i></button>
+          </div>
+          <p id="uploadError" class="error-message"></p>
+          <p class="help">
+            注意：url上传可能并不总是有效，因为有些网站不喜欢直接链接图片
+          </p>
+        </div>
+      </section>
+
+      <section class="output content">
+        <div class="content-heading">输出</div>
+        <figure class="preview-image-container">
+          <img width="112" height="112" class="preview-image" id="result" />
+          <div class="help output-info" id="info">...</div>
+        </figure>
+        <p class="help">ps: 如果要共享，请保存导出的gif，使用链接将不起作用，因为它仅存在于您的浏览器中</p>
+        <p class="help">pps: 如果导出中有奇怪的绿点，请尝试其他浏览器</p>
+      </section>
+
+      <footer class="footer help">
+        <div>
+          模板: <a href="./img/template.gif" target="_blank">gif</a>, <a href="./img/sprite.png" target="_blank">精灵图</a>
+          <span class="separator">|</span>
+          gif使用 <a href="https://github.com/jnordberg/gif.js" target="_blank">gif.js</a> 生成
+        </div>
+      </footer>
+    </main>
+    <script src="./js/requestInterval.js"></script>
+    <script src="./js/gif.js"></script>
+    <script src="./js/main.js"></script>
+  </body>
+</html>
